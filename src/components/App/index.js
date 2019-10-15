@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Sidebar,
   Button } from 'semantic-ui-react'
@@ -13,112 +13,90 @@ import AuthRoutes from './AuthRoutes'
 
 import './index.css'
 
-class App extends Component {
-  constructor() {
-    super()
-    this.state = {
-      isOpen: false,
-      width: window.innerWidth
-    }
-  }
+const TOKEN = localStorage.getItem('token')
 
-  componentDidMount() {
-    window.addEventListener('resize', this.updateWidth)
-  }
+function App(props) {
+  const [isOpen, setToggle] = useState(false)
+  const [width, setWidth] = useState(window.innerWidth)
 
-  updateWidth = () =>
-    this.setState({ width: window.innerWidth })
+  const { history } = props
 
-  toggle = () =>
-    this.setState({ isOpen: !this.state.isOpen })
+  useEffect(() => {
+    window.addEventListener('resize', () => setWidth(window.innerWidth))
+  })
 
-  logOut = () => {
-    const TOKEN = localStorage.getItem('token')
+  return (
+    <Sidebar.Pushable>
+      <Sidebar
+        id = 'navigation-sidebar'
+        animation = 'overlay'
+        direction = 'right'
+        visible = {isOpen && width <= 768}
+        onHide = {() => setToggle(!isOpen)}>
+        <SideBarBtns />
+      </Sidebar>
 
+      <Sidebar.Pusher dimmed = {isOpen}>
+        <div id='app'>
+          <Navigation
+            toggle = {setToggle}
+            redirect = {history.push} />
+          {TOKEN
+            ? <AuthRoutes />
+            : <Routes /> }
+        </div>
+      </Sidebar.Pusher>
+    </Sidebar.Pushable>
+  )
+}
+
+function SideBarBtns() {
+  const logOut = () => {
     if (TOKEN) {
       localStorage.removeItem('token')
       this.props.history.push('/')
     }
   }
 
-  render()  {
-    const TOKEN = localStorage.getItem('token')
-
-    const {
-      isOpen,
-      width } = this.state
-
-    const {
-      toggle,
-      logOut } = this
-
-    const { history } = this.props
-
-    return (
-      <Sidebar.Pushable>
-        <Sidebar
-          id='navigation-sidebar'
-          animation='overlay'
-          direction='right'
-          visible={isOpen && width <= 768}
-          onHide={toggle}>
-          <SideBarBtns logOut={logOut} />
-        </Sidebar>
-
-        <Sidebar.Pusher dimmed={isOpen}>
-          <div id='app'>
-            <Navigation
-              toggle={toggle}
-              redirect={history.push} />
-            {TOKEN
-              ? <AuthRoutes />
-              : <Routes /> }
-          </div>
-        </Sidebar.Pusher>
-      </Sidebar.Pushable>
-    )
-  }
-}
-
-const SideBarBtns = ({ logOut }) => {
-  const TOKEN = localStorage.getItem('token')
-
   return (
     TOKEN
-      ? [<Button
-        key={0}
-        as={Link}
-        to='/'
-        className='pacific-blue'>
-        View Notes
-      </Button>,
-      <Button
-        key={1}
-        as={Link}
-        to='/createnote'
-        className='pacific-blue'>
-        + Create Note
-      </Button>,
-      <Button
-        key={2}
-        className='milano-red'
-        onClick={logOut}>
-        Log Out
-      </Button>]
-      : [<Button
-        key={0}
-        as={Link}
-        className='pacific-blue'
-        to='/signup'>
-        Sign Up
-      </Button>,
-      <Button
-        key={1}
-        as={Link}
-        className='pacific-blue'
-        to='/login'>
-        Log In
-      </Button>]
+      ? [
+        <Button
+          key = {0}
+          as = {Link}
+          to = '/'
+          className = 'pacific-blue'>
+          View Notes
+        </Button>,
+        <Button
+          key = {1}
+          as = {Link}
+          to = '/createnote'
+          className = 'pacific-blue'>
+          + Create Note
+        </Button>,
+        <Button
+          key = {2}
+          className = 'milano-red'
+          onClick = {logOut}>
+          Log Out
+        </Button>]
+      : [
+        <Button
+          key = {0}
+          as = {Link}
+          className = 'pacific-blue'
+          to = '/signup'>
+          Sign Up
+        </Button>,
+        <Button
+          key =  {1}
+          as = {Link}
+          className = 'pacific-blue'
+          to = '/login'>
+          Log In
+        </Button>
+      ]
   )
 }
 

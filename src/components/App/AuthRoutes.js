@@ -8,21 +8,23 @@ import EditNote from '../EditNote/'
 
 import './index.css'
 
-const AuthRoutes = () => (
-  <div id='content-cont'>
-    <Route
-      exact path='/'
-      component={Notes} />
-    <Route
-      exact path='/createnote'
-      component={CreateNote} />
-    <Route
-      exact path='/note'
-      component={Note} />
-    <Route
-      exact path='/editnote'
-      component={EditNote} />
-  </div>
-)
+function AuthRoutes() {
+  return (
+    <div id='content-cont'>
+      <Route
+        exact path='/'
+        component={Notes} />
+      <Route
+        exact path='/createnote'
+        component={CreateNote} />
+      <Route
+        exact path='/note'
+        component={Note} />
+      <Route
+        exact path='/editnote'
+        component={EditNote} />
+    </div>
+  )
+}
 
 export default AuthRoutes
