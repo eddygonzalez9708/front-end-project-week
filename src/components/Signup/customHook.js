@@ -27,6 +27,8 @@ function useAsyncEndpoint(fn) {
   const [req, setReq] = useState()
 
   useEffect(() => {
+    let isSubscribed = true
+
     if (!req) return
     setRes({
       ...res,
@@ -50,13 +52,15 @@ function useAsyncEndpoint(fn) {
     axios({url, method, data})
       .then(() =>
         setTimeout(() => {
-          setRes({
-            pending: false,
-            error: false,
-            complete: true
-          })
+          if (isSubscribed) {
+            setRes({
+              pending: false,
+              error: false,
+              complete: true
+            })
 
-          props.history.push('/login')
+            props.history.push('/login')
+          }
         }, 3000))
       .catch(err => {
         const {
@@ -71,22 +75,26 @@ function useAsyncEndpoint(fn) {
         } = data
 
         setTimeout(() => {
-          if (status === 400) {
-            setFirstNameError(firstnameError ? firstnameError : '')
-            setLastNameError(lastnameError ? lastnameError: '')
-            setEmailError(emailError ? emailError : '')
-            setPasswordError(passwordError ? passwordError : '')
-          } else {
-            alert(`Error: ${data.msg1}`)
-          }
+          if (isSubscribed) {
+            if (status === 400) {
+              setFirstNameError(firstnameError ? firstnameError : '')
+              setLastNameError(lastnameError ? lastnameError: '')
+              setEmailError(emailError ? emailError : '')
+              setPasswordError(passwordError ? passwordError : '')
+            } else {
+              alert(`Error: ${data.msg1}`)
+            }
 
-          setRes({
-            pending: false,
-            error: true,
-            complete: true
-          })
+            setRes({
+              pending: false,
+              error: true,
+              complete: true
+            })
+          }
         }, 3000)
       })
+
+    return () => isSubscribed = false
   }, [req])
 
   return [res, (data, props, errorFuncs) => setReq(fn(data, props, errorFuncs))]
