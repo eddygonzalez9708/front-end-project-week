@@ -39,7 +39,7 @@ function App(props) {
       <Sidebar.Pusher dimmed = {isOpen}>
         <div id='app'>
           <Navigation
-            toggle = {setToggle}
+            toggle = {() => setToggle(!isOpen)}
             redirect = {history.push} />
           {TOKEN
             ? <AuthRoutes />
