@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { useState, useEffect} from 'react'
 import decode from 'jwt-decode'
 import { Card } from 'semantic-ui-react'
 import axios from 'axios'
@@ -14,23 +14,23 @@ const {
 
 const URL = REACT_APP_DEV || REACT_APP_PROD
 
-class Notes extends Component {
-  _isMounted = false
+function Notes() {
+  const [firstname, setFirstName] = useState('')
+  const [lastname, setLastName] = useState('')
+  const [notes, setNotes] = useState([])
 
-  constructor() {
-    super()
-    this.state = {
-      firstname: '',
-      lastname: '',
-      loading: false,
-      notes: []
-    }
-  }
+  const [res, setRes] = useState({
+    pending: true,
+    completed: false
+  })
 
-  componentDidMount() {
-    this._isMounted = true
+  useEffect(() => {
+    let isSubscribed = true
 
-    this.setState({ loading: true })
+    setRes({
+      ...res,
+      pending: true
+    })
 
     const TOKEN = localStorage.getItem('token')
 
@@ -46,66 +46,72 @@ class Notes extends Component {
       .get(`${URL}/api/users/${USER_ID}/notes`, REQUEST_OPTIONS)
       .then(res => {
         setTimeout(() => {
-          if (this._isMounted) {
-            this.setState({
-              loading: false,
-              ...res.data
+          if (isSubscribed) {
+            const {
+              firstname,
+              lastname,
+              notes
+            } = res.data
+
+            setRes({
+              pending: false,
+              completed: true
             })
+
+            setFirstName(firstname)
+            setLastName(lastname)
+            setNotes(notes)
           }
-        }, 3000)
+        }, 1000)
       })
       .catch(err => {
         const { data } = err.response
+
+        setRes({
+          pending: false,
+          completed: true
+        })
+
         alert(`Error: ${data}`)
       })
-  }
 
-  componentWillUnmount() {
-    this._isMounted = false
-  }
+    return () => isSubscribed = false
+  }, [])
 
-  render() {
-    const {
-      firstname,
-      lastname,
-      loading,
-      notes } = this.state
+  if (res.pending) return <Loading text = 'Loading Notes' />
 
-    if (loading) return <Loading text = 'Loading Notes' />
+  return (
+    <div className = 'content-sect padding'>
+      <h2>{firstname} {lastname} Notes:</h2>
+      {notes.length === 0
+        ? <p>You currently do not have any notes. Click on the create note button to create one.</p>
+        : <div className = 'notes'>
+          {notes.map(note => {
+            const {
+              id,
+              title,
+              text } = note
 
-    return (
-      <div className = 'content-sect padding'>
-        <h2>{firstname} {lastname} Notes:</h2>
-        {notes.length === 0
-          ? <p>You currently do not have any notes. Click on the create note button to create one.</p>
-          : <div className = 'notes'>
-            {notes.map(note => {
-              const {
-                id,
-                title,
-                text } = note
-
-              return (
-                <Card
-                  className = 'card-container'
-                  key = {id}
-                  as = {Link}
-                  to = {{
-                    pathname: '/note',
-                    state: { id }
-                  }}>
-                  <Card.Content
-                    className = 'card-header'
-                    header = {title} />
-                  <Card.Content
-                    className = 'card-description'
-                    description = {text} />
-                </Card>
-              )})}
-          </div>}
-      </div>
-    )
-  }
+            return (
+              <Card
+                className = 'card-container'
+                key = {id}
+                as = {Link}
+                to = {{
+                  pathname: '/note',
+                  state: { id }
+                }}>
+                <Card.Content
+                  className = 'card-header'
+                  header = {title} />
+                <Card.Content
+                  className = 'card-description'
+                  description = {text} />
+              </Card>
+            )})}
+        </div>}
+    </div>
+  )
 }
 
 export default Notes
