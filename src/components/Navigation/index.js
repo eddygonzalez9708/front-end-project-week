@@ -7,28 +7,25 @@ import NavAuth from './NavAuth'
 
 import './index.css'
 
-const Navigation = ({
-  toggle,
-  redirect }) => {
-
+function Navigation({ toggle, redirect }) {
   const TOKEN = localStorage.getItem('token')
 
   return (
-    <div id='navigation'>
+    <div id = 'navigation'>
       <Link
-        to='/'>
+        to = '/'>
         <h1>Lambda</h1>
         <h1>Notes</h1>
       </Link>
       {TOKEN
         ? <NavAuth
-          key={1}
-          toggle={toggle}
-          redirect={redirect} />
+          key = {1}
+          toggle = {toggle}
+          redirect = {redirect} />
         : <Nav
-          key={1}
-          toggle={toggle}
-          redirect={redirect} />}
+          key = {1}
+          toggle = {toggle}
+          redirect = {redirect} />}
     </div>
   )
 }
