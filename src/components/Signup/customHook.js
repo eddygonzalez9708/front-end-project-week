@@ -19,8 +19,8 @@ function signUpEndpoint () {
 
 function useAsyncEndpoint(fn) {
   const [res, setRes] = useState({
-    complete: false,
     pending: false,
+    complete: false,
     error: false,
   })
 
@@ -87,8 +87,8 @@ function useAsyncEndpoint(fn) {
 
             setRes({
               pending: false,
+              complete: true,
               error: true,
-              complete: true
             })
           }
         }, 3000)
