@@ -9,21 +9,20 @@ import EditNote from '../EditNote/'
 import './index.css'
 
 function AuthRoutes() {
-  console.log('auth my man')
   return (
-    <div id='content-cont'>
+    <div id = 'content-cont'>
       <Route
-        exact path='/'
-        component={Notes} />
+        exact path = '/'
+        component = {Notes} />
       <Route
-        exact path='/createnote'
-        component={CreateNote} />
+        exact path = '/createnote'
+        component = {CreateNote} />
       <Route
-        exact path='/note'
-        component={Note} />
+        exact path = '/note'
+        component = {Note} />
       <Route
-        exact path='/editnote'
-        component={EditNote} />
+        exact path = '/editnote'
+        component = {EditNote} />
     </div>
   )
 }

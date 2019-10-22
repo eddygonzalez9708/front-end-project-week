@@ -7,16 +7,16 @@ import Login from '../Login/'
 
 function Routes() {
   return (
-    <div id='content-cont'>
+    <div id = 'content-cont'>
       <Route
-        exact path='/'
-        component={About} />
+        exact path = '/'
+        component  ={About} />
       <Route
-        exact path='/signup'
-        component={Signup} />
+        exact path = '/signup'
+        component = {Signup} />
       <Route
-        exact path='/login'
-        component={Login} />
+        exact path = '/login'
+        component = {Login} />
     </div>
   )
 }
