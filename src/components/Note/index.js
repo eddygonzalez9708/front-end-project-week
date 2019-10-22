@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { useState, useEffect } from 'react'
 import decode from 'jwt-decode'
 import axios from 'axios'
 import {
@@ -17,132 +17,116 @@ const {
 
 const URL = REACT_APP_DEV || REACT_APP_PROD
 
-class Note extends Component {
-  _isMounted = false
+function Note(props) {
+  const TOKEN = localStorage.getItem('token')
 
-  constructor() {
-    super()
-    this.state = {
-      id: '',
-      loading: true,
-      modal: false,
-      text: '',
-      title: '',
-      userId: ''
+  const REQUEST_OPTIONS = {
+    headers: {
+      Authorization: TOKEN
     }
   }
 
-  componentDidMount() {
-    this._isMounted = true
+  const [id, setId] = useState('')
+  const [userId, setUserId] = useState('')
+  const [title, setTitle] = useState('')
+  const [text, setText] = useState('')
 
-    const TOKEN = localStorage.getItem('token')
+  const [res, setRes] = useState({
+    pending: true,
+    complete: false
+  })
 
-    const REQUEST_OPTIONS = {
-      headers: {
-        Authorization: TOKEN
-      }
+  const [modal, setModal] = useState(false)
+
+  useEffect(() => {
+    let isSubscribed = true
+    const { id: userId } = decode(TOKEN)
+    const { state } = props.location
+
+    if (!state) {
+      props.history.push('/')
     }
 
-    const { id: USER_ID } = decode(TOKEN)
+    const {id: noteId } = state
 
-    const { state } = this.props.location
-
-    if (!state) return this.props.history.push('/')
-
-    const { id: NOTE_ID } = state
-
-    axios.get(`${URL}/api/users/${USER_ID}/note/${NOTE_ID}`, REQUEST_OPTIONS)
+    axios.get(`${URL}/api/users/${userId}/note/${noteId}`, REQUEST_OPTIONS)
       .then(res => {
         setTimeout(() => {
-          if (this._isMounted) {
-            this.setState({
-              loading: false,
-              ...res.data,
-              userId: USER_ID
+          if (isSubscribed) {
+            const {
+              id,
+              title,
+              text
+            } = res.data
+
+            setId(id)
+            setUserId(userId)
+            setTitle(title)
+            setText(text)
+
+            setRes({
+              pending: false,
+              complete: true
             })
           }
-        }, 3000)
+        }, 1000)
       })
       .catch(err => {
         const {
           status,
           data } = err.response
 
-        if (status !== 500) alert(`Error: ${data}`)
-        else alert(`Error: ${data.msg1}`)
+        if (status !== 500) {
+          alert(`Error: ${data}`)
+        } else {
+          alert(`Error: ${data.msg1}`)
+        }
+
+        setRes({
+          pending: false,
+          complete: true
+        })
       })
-  }
+  }, [])
 
-  componentWillUnmount() {
-    this._isMounted = false
-  }
-
-  removeNote = () => {
-    const TOKEN = localStorage.getItem('token')
-
-    const {
-      userId: USER_ID,
-      id: NOTE_ID } = this.state
-
-    const REQUEST_OPTIONS = {
-      headers: {
-        Authorization: TOKEN
-      }
-    }
-
-    axios.delete(`${URL}/api/users/${USER_ID}/note/${NOTE_ID}`, REQUEST_OPTIONS)
-      .then(() => this.props.history.push('/'))
+  const removeNote = () => {
+    axios.delete(`${URL}/api/users/${userId}/note/${id}`, REQUEST_OPTIONS)
+      .then(() => props.history.push('/'))
       .catch(err => {
         const {
           status,
           data } = err.response
 
-        if (status !== 500) alert(`Error: ${data}`)
-        else alert(`Error: ${data.msg1}`)
+        if (status !== 500) {
+          alert(`Error: ${data}`)
+        } else {
+          alert(`Error: ${data.msg1}`)
+        }
       })
   }
 
-  toggle = () => {
-    const { modal } = this.state
-    this.setState({ modal: !modal })
-  }
+  if (res.pending) return <Loading text = 'Loading Note' />
 
-  render() {
-    const {
-      id,
-      loading,
-      text,
-      title,
-      modal } = this.state
-
-    const {
-      toggle,
-      removeNote } = this
-
-    if (loading) return <Loading text = 'Loading Note' />
-
-    return (
-      <div className = 'content-sect padding'>
-        <div className = 'noteButtons'>
-          <Link
-            className = 'editLink'
-            to={{
-              pathname: '/editnote',
-              state: { id }
-            }}>
-            <h3>edit</h3>
-          </Link>
-          <h3 onClick = {toggle}>delete</h3>
-        </div>
-        <h2>{title}</h2>
-        <p>{text}</p>
-        <DeleteModal
-          modal = {modal}
-          toggle = {toggle}
-          removeNote = {removeNote} />
+  return (
+    <div className = 'content-sect padding'>
+      <div className = 'noteButtons'>
+        <Link
+          className = 'editLink'
+          to = {{
+            pathname: '/editnote',
+            state: { id }}}>
+          <h3>edit</h3>
+        </Link>
+        <h3 onClick = {() => setModal(!modal)}>delete</h3>
       </div>
-    )
-  }
+      <h2>{title}</h2>
+      <p>{text}</p>
+      <DeleteModal
+        modal = {modal}
+        toggle = {() => setModal(!modal)}
+        removeNote = {removeNote} />
+    </div>
+  )
 }
 
 Note.propTypes = {
