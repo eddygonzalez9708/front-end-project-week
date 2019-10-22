@@ -13,9 +13,9 @@ import AuthRoutes from './AuthRoutes'
 
 import './index.css'
 
-const TOKEN = localStorage.getItem('token')
-
 function App(props) {
+  const TOKEN = localStorage.getItem('token')
+
   const [isOpen, setToggle] = useState(false)
   const [width, setWidth] = useState(window.innerWidth)
 
@@ -33,7 +33,7 @@ function App(props) {
         direction = 'right'
         visible = {isOpen && width <= 768}
         onHide = {() => setToggle(!isOpen)}>
-        <SideBarBtns />
+        <SideBarBtns redirect = {props.history.push} />
       </Sidebar>
 
       <Sidebar.Pusher dimmed = {isOpen}>
@@ -50,11 +50,13 @@ function App(props) {
   )
 }
 
-function SideBarBtns() {
+function SideBarBtns({ redirect }) {
+  const TOKEN = localStorage.getItem('token')
+
   const logOut = () => {
     if (TOKEN) {
       localStorage.removeItem('token')
-      this.props.history.push('/')
+      redirect('/')
     }
   }
 

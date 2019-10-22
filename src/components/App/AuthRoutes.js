@@ -9,6 +9,7 @@ import EditNote from '../EditNote/'
 import './index.css'
 
 function AuthRoutes() {
+  console.log('auth my man')
   return (
     <div id='content-cont'>
       <Route
