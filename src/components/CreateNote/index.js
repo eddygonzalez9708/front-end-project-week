@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { useState } from 'react'
 import decode from 'jwt-decode'
 import {
   Form,
@@ -15,37 +15,27 @@ const {
 
 const URL = REACT_APP_DEV || REACT_APP_PROD
 
-class CreateNote extends Component {
-  constructor() {
-    super()
-    this.state = {
-      title: '',
-      titleError: null,
-      text: '',
-      textError: null
-    }
-  }
+function CreateNote(props) {
+  const [title, setTitle] = useState('')
+  const [text, setText] = useState('')
 
-  change = (event) => {
-    const {
-      name,
-      value } = event.target
+  const [titleError, setTitleError] = useState('')
+  const [textError, setTextError] = useState('')
 
-    if (name === 'title') {
-      this.setState({
-        [name]: value,
-        titleError: null
-      })
-    } else {
-      this.setState({
-        [name]: value,
-        textError: null
-      })
-    }
-  }
-
-  submit = (event) => {
+  const submit = (event) => {
     event.preventDefault()
+
+    if (!title && !text) {
+      setTitleError('The title field is required.')
+      setTextError('The text field is required.')
+      return
+    } else if (!title) {
+      setTitleError('The title field is required.')
+      return
+    } else if (!text) {
+      setTextError('The text field is required.')
+      return
+    }
 
     const TOKEN = localStorage.getItem('token')
     const USER_ID = decode(TOKEN).id
@@ -56,10 +46,6 @@ class CreateNote extends Component {
       }
     }
 
-    const {
-      title,
-      text } = this.state
-
     axios.post(`${URL}/api/users/${USER_ID}/notes`,
       {
         title,
@@ -67,7 +53,7 @@ class CreateNote extends Component {
       }, REQUEST_OPTIONS)
       .then(res => {
         const { id } = res.data
-        this.props.history.push({
+        props.history.push({
           pathname: '/note',
           state: { id }
         })
@@ -76,64 +62,65 @@ class CreateNote extends Component {
         const {
           status,
           data } = err.response
-        if (status === 400) this.setState({ ...data })
-        else alert(`Error: ${data.msg1}`)
+
+        const {
+          titleError,
+          textError } = data
+
+        if (status === 400) {
+          setTitleError(titleError ? titleError : '')
+          setTextError(textError ? textError : '')
+        } else {
+          alert(`Error: ${data.msg1}`)
+        }
       })
   }
 
-  render() {
-    const {
-      title,
-      titleError,
-      text,
-      textError } = this.state
-
-    const {
-      change,
-      submit } = this
-
-    return (
-      <div className='content-sect padding'>
-        <h2>Create New Note:</h2>
-        <Form
-          className='create-note'
-          onSubmit={submit}>
-          <Input
-            id='title'
-            className={titleError
-              ? 'error'
-              : null}
-            name='title'
-            type='text'
-            placeholder='Note Title'
-            value={title}
-            onChange={change} />
-          {titleError
-            ? <div className='error-message titleError'>{titleError}</div>
+  return (
+    <div className = 'content-sect padding'>
+      <h2>Create New Note:</h2>
+      <Form
+        className = 'create-note'
+        onSubmit = {submit}>
+        <Input
+          id = 'title'
+          className = {titleError
+            ? 'error'
             : null}
-          <TextArea
-            id='text'
-            className={textError
-              ? 'error'
-              : null}
-            name='text'
-            placeholder='Note Content'
-            cols='50'
-            rows='15'
-            value={text}
-            onChange={change} />
-          {textError
-            ? <div className='error-message textError'>{textError}</div>
+          name = 'title'
+          type = 'text'
+          placeholder = 'Note Title'
+          value = {title}
+          onChange={(e) => {
+            setTitle(e.target.value)
+            setTitleError('')}} />
+        {titleError
+          ? <div className = 'error-message titleError'>{titleError}</div>
+          : null}
+        <TextArea
+          id = 'text'
+          className = {textError
+            ? 'error'
             : null}
-          <Button
-            id='save'
-            className='pacific-blue'>
-            Save
-          </Button>
-        </Form>
-      </div>
-    )
-  }
+          name = 'text'
+          placeholder = 'Note Content'
+          cols = '50'
+          rows = '15'
+          value = {text}
+          onChange={(e) => {
+            setText(e.target.value)
+            setTextError('')}} />
+        {textError
+          ? <div className = 'error-message textError'>{textError}</div>
+          : null}
+        <Button
+          id = 'save'
+          className = 'pacific-blue'>
+          Save
+        </Button>
+      </Form>
+    </div>
+  )
 }
 
 CreateNote.propTypes = {
