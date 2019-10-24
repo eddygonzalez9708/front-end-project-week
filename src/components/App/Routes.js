@@ -10,7 +10,7 @@ function Routes() {
     <div id = 'content-cont'>
       <Route
         exact path = '/'
-        component  ={About} />
+        component = {About} />
       <Route
         exact path = '/signup'
         component = {Signup} />
