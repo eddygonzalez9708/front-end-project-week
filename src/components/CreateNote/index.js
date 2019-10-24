@@ -37,6 +37,18 @@ function CreateNote(props) {
       return
     }
 
+    if (title.length > 30 && text.length > 1000) {
+      setTitleError('The title field may only contain a maximum of 30 characters.')
+      setTextError('The text field may only contain a maximum of 1000 characters.')
+      return
+    } else if (title.length > 30) {
+      setTitleError('The title field may only contain a maximum of 30 characters.')
+      return
+    } else if (text.length > 1000) {
+      setTextError('The text field may only contain a maximum of 1000 characters.')
+      return
+    }
+
     const TOKEN = localStorage.getItem('token')
     const USER_ID = decode(TOKEN).id
 
