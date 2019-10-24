@@ -87,6 +87,8 @@ function Note(props) {
           complete: true
         })
       })
+
+    return () => isSubscribed = false
   }, [])
 
   const removeNote = () => {
